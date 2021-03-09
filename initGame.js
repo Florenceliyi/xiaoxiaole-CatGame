@@ -45,19 +45,18 @@ function createBall() {
         }
     }
     for (let i = 0; i < 48; i++) {
+        // 计算球的 x坐标 和 y坐标
+        const x = Math.floor((i / 8)) + 1
+        const y = i % 8 + 1
+
         let ball = document.createElement('div')
         ball.style.background = createColor()
         ball.style.width = '100px'
         ball.style.height = '100px'
         ball.style.borderRadius = '50%'
-        ball.style.display = 'inline-block'
-        ball.style.fontSize = '14px'
-        ball.style.fontWeight = '600'
-        ball.style.textAlign = 'center'
-
-        // 计算球的 x坐标 和 y坐标
-        const x = Math.floor((i / 8)) + 1
-        const y = i % 8 + 1
+        ball.style.position='absolute'
+        ball.style.top = `${(x-1)*100}px`
+        ball.style.left = `${(y-1)*100}px`
         const ballObj = new Ball(ball, x, y, i)
         ballList.push(ballObj)
 
