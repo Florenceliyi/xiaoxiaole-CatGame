@@ -12,6 +12,13 @@ createBall()
 cacheList = []
 collectCleanBallY()
 
+setTimeout(() => {
+    refreshBallList()
+    console.log(ballList);
+}, 0)
+
+
+
 /**
  * 创建线条方法
  */
@@ -70,8 +77,6 @@ function createBall() {
         // 将生成的ball添加到页面
         DIV.appendChild(ball)
     }
-    console.log('cleanListX:', cleanListX);
-
 }
 
 /**
@@ -120,10 +125,9 @@ function collectCleanBallY() {
         for (let j = 0; j < 6; j++) {
             const index = j * 8 + i
             const ballObj = ballList[index]
-            collectCleanBall(ballObj,'y',cleanListY)
+            collectCleanBall(ballObj, 'y', cleanListY)
         }
     }
-    console.log('cleanListY:',cleanListY);
 }
 
 // 生成随机颜色
@@ -132,6 +136,28 @@ function createColor() {
     const len = colorArray.length
     const index = Math.floor(Math.random() * len)
     return `${colorArray[index]}`
+}
+
+// 消除符合要求的小球
+function refreshBallList() {
+    const allCleanBall = new Set([...cleanListX, ...cleanListY])
+    console.log(allCleanBall);
+    [...allCleanBall].forEach(item => {
+        item.node.classList.add('tosmall')
+
+    })
+
+    setTimeout(() => {
+        [...allCleanBall].forEach(item => {
+            if(item.node){
+                const index = item.index
+                ballList[index] = null
+                DIV.removeChild(item.node)
+            }
+        })
+    }, 1100)
+    console.log('cleanListY', cleanListY);
+    console.log('cleanListX', cleanListX);
 }
 
 // 给游戏区域添加点击事件
@@ -153,7 +179,7 @@ window.addEventListener('click', (e) => {
 
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
-                    if ((secQueen[0].x == secQueen[1].x || secQueen[0].y == secQueen[1].y) && (Math.abs((secQueen[0].x  - secQueen[0].y) - (secQueen[1].x  - secQueen[1].y)) == 1)) {
+                    if ((secQueen[0].x == secQueen[1].x || secQueen[0].y == secQueen[1].y) && (Math.abs((secQueen[0].x - secQueen[0].y) - (secQueen[1].x - secQueen[1].y)) == 1)) {
                         // 调换两个ball的位置 
                     } else {
                         secQueen[0].node.style.border = 'none'
