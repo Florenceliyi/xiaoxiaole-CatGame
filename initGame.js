@@ -121,6 +121,11 @@ window.addEventListener('click', (e) => {
         const x = Math.ceil(e.clientY / 100)
         const y = Math.ceil(e.clientX / 100)
 
+        if(secQueen[0]&&secQueen[0].x == x && secQueen[0].y == y){
+            secQueen[0].node.style.border = 'none'
+            secQueen.shift()
+            return
+        }
         // console.log('当前点击的坐标x-y:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
         for (let i = 0; i < ballList.length; i++) {
             if (ballList[i].x == x && ballList[i].y == y) {
