@@ -6,9 +6,11 @@ const secQueen = [] //当前选中的球队列
 let cacheList = []
 let cleanListX = []//横向x需要消除的小球
 let cleanListY = []//纵向y需要消除的小球
-// createLine()
+
+
 createBall()
-// checkAllBall()
+cacheList = []
+collectCleanBallY()
 
 /**
  * 创建线条方法
@@ -63,7 +65,7 @@ function createBall() {
         const ballObj = new Ball(ball, x, y, i, ball.style.background)
         ballList.push(ballObj)
 
-        collectCleanBallX(ballObj,i)
+        collectCleanBall(ballObj, 'x', cleanListX)
 
         // 将生成的ball添加到页面
         DIV.appendChild(ball)
@@ -72,8 +74,13 @@ function createBall() {
 
 }
 
-// 收集要清除X横向的依赖方法
-function collectCleanBallX(ballObj,i){
+/**
+ * 收集要清除小球的方法
+ * ballObj：Ball对象
+ * direction：横向还是纵向 ('x'/'y')
+ * cleanTemp：收集存放的容器
+ */
+function collectCleanBall(ballObj, direction, cleanTemp) {
     if (cacheList.length == 0) {
         // 1.如果cacheList 为空，则直接添加ball对象
         cacheList.push(ballObj)
@@ -81,30 +88,42 @@ function collectCleanBallX(ballObj,i){
         // 2.否则判断cacheList的长度是否小于3 
         if (cacheList.length < 3) {
             // 2.1-如果x坐标相同  则直接从cacheList取值进行对比
-            if (cacheList[0].x !== ballObj.x || cacheList[0].identification !== ballObj.identification) {
+            if (cacheList[0][direction] !== ballObj[direction] || cacheList[0].identification !== ballObj.identification) {
                 // 如果x坐标不同 或者 identification不同，则清空cacheList
                 cacheList = []
-            } 
+            }
             cacheList.push(ballObj)
 
-            if(i==47 && cacheList.length == 3){
-                // 如果当前是最后一个ball 并且cacheList长度为3则进行 添加cleanListX
+            if (ballObj.index == 47 && cacheList.length == 3) {
+                // 如果当前是最后一个ball 并且cacheList长度为3则进行 添加cleanTemp
                 cacheList.forEach(item => {
-                    cleanListX.push(item)
+                    cleanTemp.push(item)
                 })
                 cacheList = []
             }
         } else {
-            // 2.2-如果横坐标不相等 或者 标识不同，清空cacheList 存入cleanListX
-            if(ballObj.x !== cacheList[cacheList.length - 1].x|| ballObj.identification !== cacheList[cacheList.length - 1].identification){
+            // 2.2-如果横坐标不相等 或者 标识不同，清空cacheList 存入cleanTemp
+            if (ballObj[direction] !== cacheList[cacheList.length - 1][direction] || ballObj.identification !== cacheList[cacheList.length - 1].identification) {
                 cacheList.forEach(item => {
-                    cleanListX.push(item)
+                    cleanTemp.push(item)
                 })
                 cacheList = []
             }
             cacheList.push(ballObj)
         }
     }
+}
+
+// 收集要清除Y纵向小球的方法
+function collectCleanBallY() {
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 6; j++) {
+            const index = j * 8 + i
+            const ballObj = ballList[index]
+            collectCleanBall(ballObj,'y',cleanListY)
+        }
+    }
+    console.log('cleanListY:',cleanListY);
 }
 
 // 生成随机颜色
@@ -121,7 +140,7 @@ window.addEventListener('click', (e) => {
         const x = Math.ceil(e.clientY / 100)
         const y = Math.ceil(e.clientX / 100)
 
-        if(secQueen[0]&&secQueen[0].x == x && secQueen[0].y == y){
+        if (secQueen[0] && secQueen[0].x == x && secQueen[0].y == y) {
             secQueen[0].node.style.border = 'none'
             secQueen.shift()
             return
@@ -134,7 +153,7 @@ window.addEventListener('click', (e) => {
 
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
-                    if ((secQueen[0].x == secQueen[1].x || secQueen[0].y == secQueen[1].y) && (Math.abs((secQueen[0].x + - secQueen[0].y) - (secQueen[1].x + - secQueen[1].y)) == 1)) {
+                    if ((secQueen[0].x == secQueen[1].x || secQueen[0].y == secQueen[1].y) && (Math.abs((secQueen[0].x  - secQueen[0].y) - (secQueen[1].x  - secQueen[1].y)) == 1)) {
                         // 调换两个ball的位置 
                     } else {
                         secQueen[0].node.style.border = 'none'
@@ -150,27 +169,3 @@ window.addEventListener('click', (e) => {
         secQueen.shift()
     }
 })
-
-/**
- * 检查是否有小球符合消除要求
- */
-function checkAllBall() {
-    for (let i = 0; i < ballList.length; i++) {
-        /* 
-            例：当一个ball的 坐标为 x:3  y:6  并且index下标为21
-            如何推算出此坐标的上下左右ball的数据？(注意：长8 宽6)
-            推导出公式：(3-1) * 8 + 6 =  22  第22个，  再-1 得到索引 21
-
-            那么该ball的上一个ball的坐标我们可以得到：x:2 y:6  索引： (2-1)*8 + 6 = 14-1 = 13
-            那么该ball的下一个ball的坐标我们可以得到：x:4 y:6  索引： (4-1)*8 + 6 = 30-1 = 29
-            那么该ball的左一个ball的坐标我们可以得到：x:3 y:5  索引： (3-1)*8 + 5 = 21-1 = 20
-            那么该ball的右一个ball的坐标我们可以得到：x:3 y:7  索引： (3-1)*8 + 7 = 23-1 = 22
-            拿到上下左右的ball数据 进行identification标识的对比
-
-        */
-        const x = ballList[i].x
-        const y = ballList[i].y
-        const row = Math.floor(i / 8) + 1
-    }
-}
-
