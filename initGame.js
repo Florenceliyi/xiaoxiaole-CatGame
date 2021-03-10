@@ -14,10 +14,23 @@ collectCleanBallY()
 
 setTimeout(() => {
     refreshBallList()
-    console.log(ballList);
+    console.log('ballList',ballList);
+    createNewBall()
 }, 0)
 
+/**
+ * 重新填充小球的方法
+ */
+function createNewBall(){
+    for(let i = 0 ; i< ballList.length; i++){
+        if(ballList[i] == null){
+            const fallBallIndex = ballList[i].index - 8
+            ballList[i] = ballList[fallBallIndex]
+            createNewBall()
+        }
 
+    }
+}
 
 /**
  * 创建线条方法
@@ -64,11 +77,13 @@ function createBall() {
         let ball = document.createElement('div')
         ball.style.background = createColor()
         ball.style.width = '100px'
-        ball.style.height = '100px'
+        ball.style.lineHeight = '100px'
         ball.style.borderRadius = '50%'
         ball.style.position = 'absolute'
         ball.style.top = `${(x - 1) * 100}px`
         ball.style.left = `${(y - 1) * 100}px`
+        ball.innerText = i
+        ball.style.textAlign = 'center'
         const ballObj = new Ball(ball, x, y, i, ball.style.background)
         ballList.push(ballObj)
 
@@ -141,7 +156,7 @@ function createColor() {
 // 消除符合要求的小球
 function refreshBallList() {
     const allCleanBall = new Set([...cleanListX, ...cleanListY])
-    console.log(allCleanBall);
+    console.log('clean',allCleanBall);
     [...allCleanBall].forEach(item => {
         item.node.classList.add('tosmall')
 
