@@ -22,14 +22,40 @@ setTimeout(() => {
  * 重新填充小球的方法
  */
 function createNewBall(){
-    for(let i = 0 ; i< ballList.length; i++){
-        if(ballList[i] == null){
-            const fallBallIndex = ballList[i].index - 8
-            ballList[i] = ballList[fallBallIndex]
-            createNewBall()
-        }
+    //在上方生成每列对应要填充的数量
 
+    console.log("🚀 ~ file: initGame.js ~ line 30 ~ createNewBall ~ ballList", ballList)
+    let celBallCol = []
+    const columnObj = {}
+    for(let i = 0; i<ballList.length; i++){
+        if(ballList[i].node.classList.value == 'tosmall'){
+            celBallCol.push(ballList[i].column)
+            
+        }
+        if(!ballList[i]){
+            console.log(11111);
+        }
     }
+    celBallCol.forEach(item=>{
+        columnObj[item] ? columnObj[item]++ : columnObj[item] = 1
+    })
+   for(const key in columnObj){
+       for(let i = 0; i < columnObj[key]; i++){
+            let newBall = document.createElement('div')
+            newBall.style.background = createColor();
+            newBall.style.width = "100px";
+            newBall.style.height = "100px";
+            newBall.style.borderRadius = "50%";
+            newBall.style.position = "absolute";
+            newBall.style.left = (key - 1) * 100 + 'px';
+            newBall.style.top = -(i + 1) * 100 + 'px'
+            DIV.appendChild(newBall);
+       }
+   }
+    
+
+   
+
 }
 
 /**
@@ -61,10 +87,10 @@ function createLine() {
  */
 function createBall() {
     class Ball {
-        constructor(node, x, y, index, identification) {
+        constructor(node, row, column, index, identification) {
             this.node = node
-            this.x = x //第几行
-            this.y = y //第几列
+            this.row = row //第几行
+            this.column = column //第几列
             this.identification = identification //ball对象的标识
             this.index = index //在ballList中的下标
         }
@@ -72,22 +98,22 @@ function createBall() {
 
     for (let i = 0; i < 48; i++) {
         // 计算球的 x坐标 和 y坐标
-        const x = Math.floor((i / 8)) + 1
-        const y = i % 8 + 1
+        const row = Math.floor((i / 8)) + 1
+        const column = i % 8 + 1
         let ball = document.createElement('div')
         ball.style.background = createColor()
         ball.style.width = '100px'
         ball.style.lineHeight = '100px'
         ball.style.borderRadius = '50%'
         ball.style.position = 'absolute'
-        ball.style.top = `${(x - 1) * 100}px`
-        ball.style.left = `${(y - 1) * 100}px`
+        ball.style.top = `${(row - 1) * 100}px`
+        ball.style.left = `${(column - 1) * 100}px`
         ball.innerText = i
         ball.style.textAlign = 'center'
-        const ballObj = new Ball(ball, x, y, i, ball.style.background)
+        const ballObj = new Ball(ball, row, column, i, ball.style.background)
         ballList.push(ballObj)
 
-        collectCleanBall(ballObj, 'x', cleanListX)
+        collectCleanBall(ballObj, 'row', cleanListX)
 
         // 将生成的ball添加到页面
         DIV.appendChild(ball)
@@ -97,7 +123,7 @@ function createBall() {
 /**
  * 收集要清除小球的方法
  * ballObj：Ball对象
- * direction：横向还是纵向 ('x'/'y')
+ * direction：横向还是纵向 ('row'/'column')
  * cleanTemp：收集存放的容器
  */
 function collectCleanBall(ballObj, direction, cleanTemp) {
@@ -140,7 +166,7 @@ function collectCleanBallY() {
         for (let j = 0; j < 6; j++) {
             const index = j * 8 + i
             const ballObj = ballList[index]
-            collectCleanBall(ballObj, 'y', cleanListY)
+            collectCleanBall(ballObj, 'column', cleanListY)
         }
     }
 }
@@ -178,23 +204,23 @@ function refreshBallList() {
 // 给游戏区域添加点击事件
 window.addEventListener('click', (e) => {
     if (e.clientX < 800 && e.clientY < 600) {
-        const x = Math.ceil(e.clientY / 100)
-        const y = Math.ceil(e.clientX / 100)
+        const row = Math.ceil(e.clientY / 100)
+        const column = Math.ceil(e.clientX / 100)
 
-        if (secQueen[0] && secQueen[0].x == x && secQueen[0].y == y) {
+        if (secQueen[0] && secQueen[0].row == row && secQueen[0].column == column) {
             secQueen[0].node.style.border = 'none'
             secQueen.shift()
             return
         }
-        // console.log('当前点击的坐标x-y:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
+        // console.log('当前点击的坐标x-column:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
         for (let i = 0; i < ballList.length; i++) {
-            if (ballList[i].x == x && ballList[i].y == y) {
+            if (ballList[i].row == row && ballList[i].column == column) {
                 secQueen.push(ballList[i])
                 ballList[i].node.style.border = '3px solid #fff'
 
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
-                    if ((secQueen[0].x == secQueen[1].x || secQueen[0].y == secQueen[1].y) && (Math.abs((secQueen[0].x - secQueen[0].y) - (secQueen[1].x - secQueen[1].y)) == 1)) {
+                    if ((secQueen[0].row == secQueen[1].row || secQueen[0].column == secQueen[1].column) && (Math.abs((secQueen[0].row - secQueen[0].column) - (secQueen[1].row - secQueen[1].column)) == 1)) {
                         // 调换两个ball的位置 
                     } else {
                         secQueen[0].node.style.border = 'none'
