@@ -1,4 +1,4 @@
-const DIV = document.querySelector("#contanier")
+const DIV = document.querySelector("#container")
 const clinetWidth = DIV.clientWidth //页面宽度
 const clientHeight = DIV.clientHeight//页面高度
 const ballList = [] //球的合集
@@ -6,36 +6,49 @@ const secQueen = [] //当前选中的球队列
 let cacheList = []
 let cleanListX = []//横向x需要消除的小球
 let cleanListY = []//纵向y需要消除的小球
+const celBallCol = [];
 
 
 createBall()
 cacheList = []
 collectCleanBallY()
 
+
 setTimeout(() => {
-    refreshBallList()
-    console.log('ballList',ballList);
-    createNewBall()
-}, 0)
+   refreshBallList().then(()=>{createNewBall()})
+}, 0);
+
+
+
+
+
+
 
 /**
  * 重新填充小球的方法
  */
 function createNewBall(){
-    //在上方生成每列对应要填充的数量
-
-    console.log("🚀 ~ file: initGame.js ~ line 30 ~ createNewBall ~ ballList", ballList)
-    let celBallCol = []
-    const columnObj = {}
-    for(let i = 0; i<ballList.length; i++){
-        if(ballList[i].node.classList.value == 'tosmall'){
-            celBallCol.push(ballList[i].column)
-            
+    //判断是否为空，为空，若为空则把上方的小球往下挪
+    console.log("🚀 ~ file: initGame.js ~ line 30 ~ createNewBall ~ !ballList[i]", ballList)
+    for(let i = 0;  i < ballList.length; i++){
+        // console.log(ballList[i]);
+        if(!ballList[i] && ballList[i - 8]){
+            const preNode = ballList[i - 8].node;
+            ballList[i] = ballList[i - 8]
+            preNode.classList.add("toBig");
+            preNode.style.top = parseInt(preNode.style.top) + 100 + 'px'
+            let divList = document.querySelectorAll('#container');
+            divList = [...divList]
+            ballList[i - 8] = null
+            createNewBall();
         }
-        if(!ballList[i]){
-            console.log(11111);
-        }
+        
     }
+    console.log(ballList);
+    // console.log(ballList);
+    //在上方生成每列对应要填充的数量
+    const columnObj = {}
+  
     celBallCol.forEach(item=>{
         columnObj[item] ? columnObj[item]++ : columnObj[item] = 1
     })
@@ -53,9 +66,6 @@ function createNewBall(){
        }
    }
     
-
-   
-
 }
 
 /**
@@ -180,25 +190,27 @@ function createColor() {
 }
 
 // 消除符合要求的小球
-function refreshBallList() {
+ function refreshBallList() {
     const allCleanBall = new Set([...cleanListX, ...cleanListY])
     console.log('clean',allCleanBall);
     [...allCleanBall].forEach(item => {
         item.node.classList.add('tosmall')
-
+        celBallCol.push(item.column);
     })
 
-    setTimeout(() => {
-        [...allCleanBall].forEach(item => {
-            if(item.node){
-                const index = item.index
-                ballList[index] = null
-                DIV.removeChild(item.node)
+    return new Promise((resolve,reject) =>(
+        setTimeout(() => {
+          [...allCleanBall].forEach((item) => {
+            if (item.node) {
+              const index = item.index;
+              ballList[index] = null;
+              DIV.removeChild(item.node);
             }
-        })
-    }, 1100)
-    console.log('cleanListY', cleanListY);
-    console.log('cleanListX', cleanListX);
+          });
+
+          resolve()
+        }, 1100)
+    ))
 }
 
 // 给游戏区域添加点击事件

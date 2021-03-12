@@ -10,7 +10,7 @@
         body{
             position: relative;
         }
-        #contanier {
+        #container {
             position: absolute;
             width: 800px;
             height: 600px;
@@ -19,22 +19,25 @@
             font-size: 20px;
             margin-top: 600px;
         }
-        #contanier>div{
+        #container>div{
             transform: scale(1);
             transition: transform 1s;
         }
-        #contanier>div.tosmall{
+        #container>div.tosmall{
             transform: scale(0);
+        }
+        #container>div.toBig{
+            transition: all 1s;
         }
     </style>
 </head>
 
 <body>
-    <div id="contanier">
+    <div id="container">
 
     </div>
 
-
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>;
     <script src="./initGame.js"></script>
     <script>
        
