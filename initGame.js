@@ -1,71 +1,106 @@
 const DIV = document.querySelector("#container")
 const clinetWidth = DIV.clientWidth //页面宽度
-const clientHeight = DIV.clientHeight//页面高度
+const clientHeight = DIV.clientHeight //页面高度
 const ballList = [] //球的合集
-const secQueen = [] //当前选中的球队列 
+let secQueen = [] //当前选中的球队列 
 let cacheList = []
-let cleanListX = []//横向x需要消除的小球
-let cleanListY = []//纵向y需要消除的小球
+let cleanListX = [] //横向x需要消除的小球
+let cleanListY = [] //纵向y需要消除的小球
 const celBallCol = [];
 
+class Ball {
+    constructor(node, row, column, index, identification) {
+        this.node = node
+        this.row = row //第几行
+        this.column = column //第几列
+        this.identification = identification //ball对象的标识
+        this.index = index //在ballList中的下标
+    }
+}
 
 createBall()
 cacheList = []
 collectCleanBallY()
 
+initGame()
 
-setTimeout(() => {
-   refreshBallList().then(()=>{createNewBall()})
-}, 0);
-
-
-
-
+function initGame() {
+    setTimeout(() => {
+        refreshBallList().then(() => {
+            moveToBottom()
+            createNewBall()
+            collectCleanBallX();
+            collectCleanBallY();
+            if (cleanListX.length !== 0 || cleanListY.length !== 0) {
+                initGame()
+            }
+        })
+    }, 0);
+}
 
 
 
 /**
+ * 
+ * 小球下移方法
+ * 
+ * */
+function moveToBottom() {
+    //判断是否为空，为空，若为空则把上方的小球往下挪
+    for (let i = ballList.length - 1; i > -1; i--) {
+        // console.log(ballList[i]);
+        if (!ballList[i] && ballList[i - 8]) { //如果当前ball为空  并且 上一个ball存在
+            const preNode = ballList[i - 8].node; // 拿到上一个节点
+            // console.log('当前遍历到的节点',ballList[i],'当前节点的上一个节点',ballList[i - 8]);
+            ballList[i] = ballList[i - 8] // 当前节点就等于上一个节点
+            ballList[i].row++
+            ballList[i].index += 8
+            // ballList[i].node.innerText = ballList[i].index
+            // preNode.classList.add("transition");
+            preNode.style.top = parseInt(preNode.style.top) + 100 + 'px'
+            // let divList = document.querySelectorAll('#container');
+            // divList = [...divList]
+            ballList[i - 8] = null
+            moveToBottom();
+        }
+
+    }
+}
+/**
  * 重新填充小球的方法
  */
-function createNewBall(){
-    //判断是否为空，为空，若为空则把上方的小球往下挪
-    console.log("🚀 ~ file: initGame.js ~ line 30 ~ createNewBall ~ !ballList[i]", ballList)
-    for(let i = 0;  i < ballList.length; i++){
-        // console.log(ballList[i]);
-        if(!ballList[i] && ballList[i - 8]){
-            const preNode = ballList[i - 8].node;
-            ballList[i] = ballList[i - 8]
-            preNode.classList.add("toBig");
-            preNode.style.top = parseInt(preNode.style.top) + 100 + 'px'
-            let divList = document.querySelectorAll('#container');
-            divList = [...divList]
-            ballList[i - 8] = null
-            createNewBall();
+function createNewBall() {
+    for (let i = 1; i < 9; i++) {
+
+        let initCount = 1;
+
+        for (let j = 6; j > 0; j--) {
+            const index = j * 8 - i
+            if (!ballList[index]) {
+                const row = Math.floor((index / 8)) + 1
+                const column = index % 8 + 1
+                let ball = document.createElement('div')
+                ball.style.background = createColor()
+                ball.style.width = '100px'
+                ball.style.height = '100px'
+                ball.style.borderRadius = '50%'
+                ball.style.position = 'absolute'
+                ball.style.top = `-${(initCount) * 100}px`
+                ball.style.left = `${(column - 1) * 100}px`
+                // ball.innerText = index
+                ball.style.textAlign = 'center'
+                // console.log(`这是第${row}行，第${column}列`,ballList[index]);
+                let ballObj = new Ball(ball, row, column, index, ball.style.background)
+                ballList[index] = ballObj
+                DIV.appendChild(ball)
+                initCount++
+                setTimeout(() => {
+                    ball.style.top = `${(row - 1 ) * 100}px`
+                }, 100)
+            }
         }
-        
     }
-    console.log(ballList);
-    // console.log(ballList);
-    //在上方生成每列对应要填充的数量
-    const columnObj = {}
-  
-    celBallCol.forEach(item=>{
-        columnObj[item] ? columnObj[item]++ : columnObj[item] = 1
-    })
-   for(const key in columnObj){
-       for(let i = 0; i < columnObj[key]; i++){
-            let newBall = document.createElement('div')
-            newBall.style.background = createColor();
-            newBall.style.width = "100px";
-            newBall.style.height = "100px";
-            newBall.style.borderRadius = "50%";
-            newBall.style.position = "absolute";
-            newBall.style.left = (key - 1) * 100 + 'px';
-            newBall.style.top = -(i + 1) * 100 + 'px'
-            DIV.appendChild(newBall);
-       }
-   }
-    
+
 }
 
 /**
@@ -96,15 +131,6 @@ function createLine() {
  * 创建小球方法
  */
 function createBall() {
-    class Ball {
-        constructor(node, row, column, index, identification) {
-            this.node = node
-            this.row = row //第几行
-            this.column = column //第几列
-            this.identification = identification //ball对象的标识
-            this.index = index //在ballList中的下标
-        }
-    }
 
     for (let i = 0; i < 48; i++) {
         // 计算球的 x坐标 和 y坐标
@@ -113,18 +139,16 @@ function createBall() {
         let ball = document.createElement('div')
         ball.style.background = createColor()
         ball.style.width = '100px'
-        ball.style.lineHeight = '100px'
+        ball.style.height = '100px'
         ball.style.borderRadius = '50%'
         ball.style.position = 'absolute'
         ball.style.top = `${(row - 1) * 100}px`
         ball.style.left = `${(column - 1) * 100}px`
-        ball.innerText = i
+        // ball.innerText = i
         ball.style.textAlign = 'center'
         const ballObj = new Ball(ball, row, column, i, ball.style.background)
         ballList.push(ballObj)
-
         collectCleanBall(ballObj, 'row', cleanListX)
-
         // 将生成的ball添加到页面
         DIV.appendChild(ball)
     }
@@ -180,6 +204,13 @@ function collectCleanBallY() {
         }
     }
 }
+// 收集要清除X纵向小球的方法
+function collectCleanBallX() {
+    for (let i = 0; i < 48; i++) {
+        const ballObj = ballList[i]
+        collectCleanBall(ballObj, 'row', cleanListX)
+    }
+}
 
 // 生成随机颜色
 function createColor() {
@@ -190,27 +221,50 @@ function createColor() {
 }
 
 // 消除符合要求的小球
- function refreshBallList() {
-    const allCleanBall = new Set([...cleanListX, ...cleanListY])
-    console.log('clean',allCleanBall);
+function refreshBallList() {
+    const allCleanBall = new Set([...cleanListX, ...cleanListY]);
     [...allCleanBall].forEach(item => {
         item.node.classList.add('tosmall')
         celBallCol.push(item.column);
     })
-
-    return new Promise((resolve,reject) =>(
+    cleanListX = []
+    cleanListY = []
+    return new Promise((resolve, reject) => (
         setTimeout(() => {
-          [...allCleanBall].forEach((item) => {
-            if (item.node) {
-              const index = item.index;
-              ballList[index] = null;
-              DIV.removeChild(item.node);
-            }
-          });
-
-          resolve()
+            [...allCleanBall].forEach((item) => {
+                if (item.node) {
+                    const index = item.index;
+                    ballList[index] = null;
+                    DIV.removeChild(item.node);
+                }
+            });
+            resolve()
         }, 1100)
     ))
+}
+
+// 清楚选中队列方法
+function cleanSecQueen() {
+    secQueen[0].node.style.border = 'none'
+    secQueen[1].node.style.border = 'none'
+    secQueen = []
+}
+// 调换两个节点位置
+function replacePostion() {
+    // 调换两个ball的位置 
+    const firstNode = secQueen[0].node //第一个节点
+    const lastNode = secQueen[1].node //第二个节点
+    if (firstNode.style.top == lastNode.style.top) {
+        [firstNode.style.left, lastNode.style.left] = [lastNode.style.left, firstNode.style.left]
+    }
+    if (firstNode.style.left == lastNode.style.left) {
+        [firstNode.style.top, lastNode.style.top] = [lastNode.style.top, firstNode.style.top]
+    }
+    ballList[secQueen[0].index].node = lastNode
+    ballList[secQueen[1].index].node = firstNode
+    const firstTag = secQueen[0].identification
+    const lastTag = secQueen[1].identification;
+    [ballList[secQueen[0].index].identification, ballList[secQueen[1].index].identification] = [lastTag, firstTag]
 }
 
 // 给游戏区域添加点击事件
@@ -220,20 +274,42 @@ window.addEventListener('click', (e) => {
         const column = Math.ceil(e.clientX / 100)
 
         if (secQueen[0] && secQueen[0].row == row && secQueen[0].column == column) {
-            secQueen[0].node.style.border = 'none'
-            secQueen.shift()
+            cleanSecQueen()
             return
         }
         // console.log('当前点击的坐标x-column:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
         for (let i = 0; i < ballList.length; i++) {
             if (ballList[i].row == row && ballList[i].column == column) {
                 secQueen.push(ballList[i])
-                ballList[i].node.style.border = '3px solid #fff'
+                ballList[i].node.style.border = '5px solid #fff'
 
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
                     if ((secQueen[0].row == secQueen[1].row || secQueen[0].column == secQueen[1].column) && (Math.abs((secQueen[0].row - secQueen[0].column) - (secQueen[1].row - secQueen[1].column)) == 1)) {
-                        // 调换两个ball的位置 
+
+                        replacePostion()
+                        // 换完位置后  搜索要清楚的横纵ball
+                        collectCleanBallX();
+                        collectCleanBallY();
+                        console.log(cleanListX, cleanListY);
+                        if (cleanListX.length || cleanListY.length) {
+                            initGame()
+                            cleanSecQueen()
+                        } else {
+                            console.log(ballList);
+                            setTimeout(() => {
+                                replacePostion()
+                                cleanSecQueen()
+                            }, 1000)
+                        }
+                        // const originalIndex = secQueen[0].index
+                        // const changeIndex = secQueen[1].index
+                        // let tempObj = secQueen[0]
+                        // console.log("11", tempObj)
+                        // ballList[changeIndex] = secQueen[1]
+                        // ballList[originalIndex] = tempObj
+
+                        // console.log(ballList);
                     } else {
                         secQueen[0].node.style.border = 'none'
                         secQueen.shift()
@@ -244,7 +320,6 @@ window.addEventListener('click', (e) => {
         }
     } else {
         if (secQueen.length == 0) return
-        secQueen[0].node.style.border = 'none'
-        secQueen.shift()
+        cleanSecQueen()
     }
 })
