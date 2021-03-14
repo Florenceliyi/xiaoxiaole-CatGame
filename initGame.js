@@ -8,6 +8,16 @@ let cleanListX = [] //横向x需要消除的小球
 let cleanListY = [] //纵向y需要消除的小球
 const celBallCol = [];
 
+class Queen {
+    constructor() {
+        this.temp = []
+    }
+    add(val) {
+        this.temp.push(val)
+    }
+    
+}
+let animateQueen = new Queen()
 class Ball {
     constructor(node, row, column, index, identification) {
         this.node = node
