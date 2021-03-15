@@ -3,7 +3,7 @@ const clinetWidth = DIV.clientWidth //页面宽度
 const clientHeight = DIV.clientHeight //页面高度
 const ballList = [] //球的合集
 let secQueen = [] //当前选中的球队列 
-let cacheList = []//暂时存放小球
+let cacheList = [] //暂时存放小球
 let cleanListX = [] //横向x需要消除的小球
 let cleanListY = [] //纵向y需要消除的小球
 
@@ -15,7 +15,7 @@ class Queen {
     add(val) {
         this.temp.push(val)
     }
-    
+
 }
 let animateQueen = new Queen()
 class Ball {
@@ -83,18 +83,19 @@ function createNewBall() {
             if (!ballList[index]) {
                 const row = Math.floor((index / 8)) + 1
                 const column = index % 8 + 1
-                let ball = document.createElement('div')
-                ball.style.background = createColor()
+                let ball = document.createElement('img')
+                // ball.style.background = createColor()
+                ball.style.display = 'inline-block'
+                ball.src = createColor()
                 ball.style.width = '100px'
                 ball.style.height = '100px'
                 ball.style.borderRadius = '50%'
                 ball.style.position = 'absolute'
                 ball.style.top = `-${(initCount) * 100}px`
                 ball.style.left = `${(column - 1) * 100}px`
-                // ball.innerText = index
                 ball.style.textAlign = 'center'
                 // console.log(`这是第${row}行，第${column}列`,ballList[index]);
-                let ballObj = new Ball(ball, row, column, index, ball.style.background)
+                let ballObj = new Ball(ball, row, column, index, ball.src)
                 ballList[index] = ballObj
                 DIV.appendChild(ball)
                 initCount++
@@ -149,7 +150,7 @@ function createBall() {
         ball.style.left = `${(column - 1) * 100}px`
         // ball.innerText = i
         ball.style.textAlign = 'center'
-        const ballObj = new Ball(ball, row, column, i, ball.style.background)
+        const ballObj = new Ball(ball, row, column, i, ball.src)
         ballList.push(ballObj)
         collectCleanBall(ballObj, 'row', cleanListX)
         // 将生成的ball添加到页面
@@ -217,7 +218,14 @@ function collectCleanBallX() {
 
 // 生成随机颜色
 function createColor() {
-    const colorArray = ['#0b8b40', '#f5d920', '#d8132e', '#0863aa', '#d15b98', '#e96069']
+    const colorArray = [
+        "assets/cat1.jpg",
+        "assets/cat2.jpg",
+        "assets/cat3.jpg",
+        "assets/cat4.jpg",
+        "assets/cat5.jpg",
+        "assets/cat6.jpg",
+    ];
     const len = colorArray.length
     const index = Math.floor(Math.random() * len)
     return `${colorArray[index]}`
@@ -231,8 +239,10 @@ function refreshBallList() {
     })
     cleanListX = []
     cleanListY = []
+    console.log("🚀 ~ file: initGame.js ~ line 238 ~ refreshBallList ~ allCleanBall", allCleanBall)
     return new Promise((resolve, reject) => (
         setTimeout(() => {
+            console.log(ballList);
             [...allCleanBall].forEach((item) => {
                 if (item.node) {
                     const index = item.index;
@@ -241,7 +251,7 @@ function refreshBallList() {
                 }
             });
             resolve()
-        }, 500)
+        }, 1000)
     ))
 }
 
@@ -303,7 +313,7 @@ window.addEventListener('click', (e) => {
                                 cleanSecQueen();
                             }, 1100)
                         }
-                        
+
                     } else {
                         secQueen[0].node.style.border = 'none'
                         secQueen.shift()
