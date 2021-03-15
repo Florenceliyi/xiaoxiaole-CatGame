@@ -58,10 +58,8 @@ function initGame() {
 function moveToBottom() {
     //判断是否为空，为空，若为空则把上方的小球往下挪
     for (let i = ballList.length - 1; i > -1; i--) {
-        // console.log(ballList[i]);
         if (!ballList[i] && ballList[i - 8]) { //如果当前ball为空  并且 上一个ball存在
             const preNode = ballList[i - 8].node; // 拿到上一个节点
-            // console.log('当前遍历到的节点',ballList[i],'当前节点的上一个节点',ballList[i - 8]);
             ballList[i] = ballList[i - 8] // 当前节点就等于上一个节点
             ballList[i].row++
             ballList[i].index += 8
@@ -94,7 +92,6 @@ function createNewBall() {
                 ball.style.top = `-${(initCount) * 100}px`
                 ball.style.left = `${(column - 1) * 100}px`
                 ball.style.textAlign = 'center'
-                // console.log(`这是第${row}行，第${column}列`,ballList[index]);
                 let ballObj = new Ball(ball, row, column, index, ball.src)
                 ballList[index] = ballObj
                 DIV.appendChild(ball)
@@ -140,8 +137,9 @@ function createBall() {
         // 计算球的 x坐标 和 y坐标
         const row = Math.floor((i / 8)) + 1
         const column = i % 8 + 1
-        let ball = document.createElement('div')
-        ball.style.background = createColor()
+        let ball = document.createElement("img");
+        ball.style.display = "inline-block";
+        ball.src = createColor();
         ball.style.width = '100px'
         ball.style.height = '100px'
         ball.style.borderRadius = '50%'
@@ -239,10 +237,8 @@ function refreshBallList() {
     })
     cleanListX = []
     cleanListY = []
-    console.log("🚀 ~ file: initGame.js ~ line 238 ~ refreshBallList ~ allCleanBall", allCleanBall)
     return new Promise((resolve, reject) => (
         setTimeout(() => {
-            console.log(ballList);
             [...allCleanBall].forEach((item) => {
                 if (item.node) {
                     const index = item.index;
@@ -289,7 +285,6 @@ window.addEventListener('click', (e) => {
             cleanSecQueen()
             return
         }
-        // console.log('当前点击的坐标x-column:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
         for (let i = 0; i < ballList.length; i++) {
             if (ballList[i].row == row && ballList[i].column == column) {
                 secQueen.push(ballList[i])
@@ -302,12 +297,10 @@ window.addEventListener('click', (e) => {
                         // 换完位置后  搜索要清楚的横纵ball
                         collectCleanBallX();
                         collectCleanBallY();
-                        console.log(cleanListX, cleanListY);
                         if (cleanListX.length || cleanListY.length) {
                             initGame()
                             cleanSecQueen()
                         } else {
-                            console.log(ballList);
                             setTimeout(() => {
                                 replacePostion()
                                 cleanSecQueen();
