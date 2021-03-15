@@ -3,10 +3,10 @@ const clinetWidth = DIV.clientWidth //页面宽度
 const clientHeight = DIV.clientHeight //页面高度
 const ballList = [] //球的合集
 let secQueen = [] //当前选中的球队列 
-let cacheList = []
+let cacheList = []//暂时存放小球
 let cleanListX = [] //横向x需要消除的小球
 let cleanListY = [] //纵向y需要消除的小球
-const celBallCol = [];
+
 
 class Queen {
     constructor() {
@@ -41,7 +41,7 @@ function initGame() {
             createNewBall()
             collectCleanBallX();
             collectCleanBallY();
-            if (cleanListX.length !== 0 || cleanListY.length !== 0) {
+            if (cleanListX.length || cleanListY.length) {
                 initGame()
             }
         })
@@ -65,11 +65,7 @@ function moveToBottom() {
             ballList[i] = ballList[i - 8] // 当前节点就等于上一个节点
             ballList[i].row++
             ballList[i].index += 8
-            // ballList[i].node.innerText = ballList[i].index
-            // preNode.classList.add("transition");
             preNode.style.top = parseInt(preNode.style.top) + 100 + 'px'
-            // let divList = document.querySelectorAll('#container');
-            // divList = [...divList]
             ballList[i - 8] = null
             moveToBottom();
         }
@@ -81,9 +77,7 @@ function moveToBottom() {
  */
 function createNewBall() {
     for (let i = 1; i < 9; i++) {
-
         let initCount = 1;
-
         for (let j = 6; j > 0; j--) {
             const index = j * 8 - i
             if (!ballList[index]) {
@@ -106,7 +100,7 @@ function createNewBall() {
                 initCount++
                 setTimeout(() => {
                     ball.style.top = `${(row - 1 ) * 100}px`
-                }, 100)
+                }, 10)
             }
         }
     }
@@ -141,7 +135,6 @@ function createLine() {
  * 创建小球方法
  */
 function createBall() {
-
     for (let i = 0; i < 48; i++) {
         // 计算球的 x坐标 和 y坐标
         const row = Math.floor((i / 8)) + 1
@@ -235,7 +228,6 @@ function refreshBallList() {
     const allCleanBall = new Set([...cleanListX, ...cleanListY]);
     [...allCleanBall].forEach(item => {
         item.node.classList.add('tosmall')
-        celBallCol.push(item.column);
     })
     cleanListX = []
     cleanListY = []
@@ -249,7 +241,7 @@ function refreshBallList() {
                 }
             });
             resolve()
-        }, 1100)
+        }, 500)
     ))
 }
 
@@ -265,10 +257,10 @@ function replacePostion() {
     const firstNode = secQueen[0].node //第一个节点
     const lastNode = secQueen[1].node //第二个节点
     if (firstNode.style.top == lastNode.style.top) {
-        [firstNode.style.left, lastNode.style.left] = [lastNode.style.left, firstNode.style.left]
+        [lastNode.style.left, firstNode.style.left] = [firstNode.style.left, lastNode.style.left]
     }
     if (firstNode.style.left == lastNode.style.left) {
-        [firstNode.style.top, lastNode.style.top] = [lastNode.style.top, firstNode.style.top]
+        [lastNode.style.top, firstNode.style.top] = [firstNode.style.top, lastNode.style.top]
     }
     ballList[secQueen[0].index].node = lastNode
     ballList[secQueen[1].index].node = firstNode
@@ -296,8 +288,7 @@ window.addEventListener('click', (e) => {
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
                     if ((secQueen[0].row == secQueen[1].row || secQueen[0].column == secQueen[1].column) && (Math.abs((secQueen[0].row - secQueen[0].column) - (secQueen[1].row - secQueen[1].column)) == 1)) {
-
-                        replacePostion()
+                        replacePostion();
                         // 换完位置后  搜索要清楚的横纵ball
                         collectCleanBallX();
                         collectCleanBallY();
@@ -309,17 +300,10 @@ window.addEventListener('click', (e) => {
                             console.log(ballList);
                             setTimeout(() => {
                                 replacePostion()
-                                cleanSecQueen()
-                            }, 1000)
+                                cleanSecQueen();
+                            }, 1100)
                         }
-                        // const originalIndex = secQueen[0].index
-                        // const changeIndex = secQueen[1].index
-                        // let tempObj = secQueen[0]
-                        // console.log("11", tempObj)
-                        // ballList[changeIndex] = secQueen[1]
-                        // ballList[originalIndex] = tempObj
-
-                        // console.log(ballList);
+                        
                     } else {
                         secQueen[0].node.style.border = 'none'
                         secQueen.shift()
