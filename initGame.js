@@ -217,12 +217,12 @@ function collectCleanBallX() {
 // 生成随机颜色
 function createColor() {
     const colorArray = [
-        "assets/cat1.jpg",
-        "assets/cat2.jpg",
-        "assets/cat3.jpg",
-        "assets/cat4.jpg",
-        "assets/cat5.jpg",
-        "assets/cat6.jpg",
+        "assets/cat1.png",
+        "assets/cat2.png",
+        "assets/cat3.png",
+        "assets/cat4.png",
+        "assets/cat5.png",
+        "assets/cat6.png",
     ];
     const len = colorArray.length
     const index = Math.floor(Math.random() * len)

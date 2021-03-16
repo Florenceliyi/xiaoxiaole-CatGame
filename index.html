@@ -7,28 +7,48 @@
     <title>Document</title>
     <link rel="stylesheet" href="./reset.css">
     <style>
-        body{
+        body {
             position: relative;
         }
+
         #container {
             position: absolute;
             width: 800px;
             height: 600px;
-            background-color: black;
+            background-color: #fff;
             overflow: hidden;
             font-size: 20px;
         }
-        #container>div{
+
+        #container>img {
             opacity: 1;
             transition: top 0.8s, left 0.8s;
-            transition: transform 1s;
         }
-        #container>div.tosmall{
+
+        #container>img.tosmall {
+            animation: mymove 3s infinite;
             opacity: 0;
             transition: opacity 1.5s;
         }
-       
-        
+
+        @keyframes mymove
+            {
+            0% {
+                transform: rotate(45deg)
+            }
+
+            50% {
+                transform: rotate(-45deg)
+            }
+
+            75% {
+                transform: rotate(0deg)
+            }
+
+            100% {
+                top: -100px;
+            }
+        }
     </style>
 </head>
 
@@ -39,7 +59,7 @@
 
     <script src="./initGame.js"></script>
     <script>
-       
+
     </script>
 
 </body>
