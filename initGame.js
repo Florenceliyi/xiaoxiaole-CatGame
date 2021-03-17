@@ -42,7 +42,12 @@ function initGame() {
             collectCleanBallX();
             collectCleanBallY();
             if (cleanListX.length || cleanListY.length) {
-                initGame()
+                setTimeout(()=>{
+                    initGame()
+                },900)
+            }else{
+                // 如果不需要清除了 就添加点击事件
+                window.addEventListener('click', playHandler)
             }
         })
     }, 0);
@@ -98,7 +103,7 @@ function createNewBall() {
                 initCount++
                 setTimeout(() => {
                     ball.style.top = `${(row - 1 ) * 100}px`
-                }, 10)
+                }, 100)
             }
         }
     }
@@ -231,6 +236,9 @@ function createColor() {
 
 // 消除符合要求的小球
 function refreshBallList() {
+    // 消除小球的时候解绑事件
+    window.removeEventListener('click', playHandler)
+
     const allCleanBall = new Set([...cleanListX, ...cleanListY]);
     [...allCleanBall].forEach(item => {
         item.node.classList.add('tosmall')
@@ -253,8 +261,8 @@ function refreshBallList() {
 
 // 清楚选中队列方法
 function cleanSecQueen() {
-    secQueen[0].node.style.border = 'none'
-    secQueen[1].node.style.border = 'none'
+    if(secQueen[0]) secQueen[0].node.style.border = 'none';
+    if(secQueen[1]) secQueen[1].node.style.border = 'none';
     secQueen = []
 }
 // 调换两个节点位置
@@ -275,8 +283,10 @@ function replacePostion() {
     [ballList[secQueen[0].index].identification, ballList[secQueen[1].index].identification] = [lastTag, firstTag]
 }
 
+
 // 给游戏区域添加点击事件
-window.addEventListener('click', (e) => {
+window.addEventListener('click', playHandler)
+function playHandler (e) {
     if (e.clientX < 800 && e.clientY < 600) {
         const row = Math.ceil(e.clientY / 100)
         const column = Math.ceil(e.clientX / 100)
@@ -293,16 +303,20 @@ window.addEventListener('click', (e) => {
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
                     if ((secQueen[0].row == secQueen[1].row || secQueen[0].column == secQueen[1].column) && (Math.abs((secQueen[0].row - secQueen[0].column) - (secQueen[1].row - secQueen[1].column)) == 1)) {
+                        window.removeEventListener('click', playHandler)
                         replacePostion();
                         // 换完位置后  搜索要清楚的横纵ball
                         collectCleanBallX();
                         collectCleanBallY();
                         if (cleanListX.length || cleanListY.length) {
-                            initGame()
-                            cleanSecQueen()
+                            setTimeout(()=>{
+                                initGame()
+                                cleanSecQueen()
+                            },800)
                         } else {
                             setTimeout(() => {
                                 replacePostion()
+                                window.addEventListener('click', playHandler)
                                 cleanSecQueen();
                             }, 1100)
                         }
@@ -319,4 +333,4 @@ window.addEventListener('click', (e) => {
         if (secQueen.length == 0) return
         cleanSecQueen()
     }
-})
+}
