@@ -23,12 +23,11 @@ var ballList = []; //球的合集
 
 var secQueen = []; //当前选中的球队列 
 
-var cacheList = [];
+var cacheList = []; //暂时存放小球
+
 var cleanListX = []; //横向x需要消除的小球
 
 var cleanListY = []; //纵向y需要消除的小球
-
-var celBallCol = [];
 
 var Queen =
 /*#__PURE__*/
@@ -77,8 +76,13 @@ function initGame() {
       collectCleanBallX();
       collectCleanBallY();
 
-      if (cleanListX.length !== 0 || cleanListY.length !== 0) {
-        initGame();
+      if (cleanListX.length || cleanListY.length) {
+        setTimeout(function () {
+          initGame();
+        }, 900);
+      } else {
+        // 如果不需要清除了 就添加点击事件
+        window.addEventListener('click', playHandler);
       }
     });
   }, 0);
@@ -93,21 +97,15 @@ function initGame() {
 function moveToBottom() {
   //判断是否为空，为空，若为空则把上方的小球往下挪
   for (var i = ballList.length - 1; i > -1; i--) {
-    // console.log(ballList[i]);
     if (!ballList[i] && ballList[i - 8]) {
       //如果当前ball为空  并且 上一个ball存在
       var preNode = ballList[i - 8].node; // 拿到上一个节点
-      // console.log('当前遍历到的节点',ballList[i],'当前节点的上一个节点',ballList[i - 8]);
 
       ballList[i] = ballList[i - 8]; // 当前节点就等于上一个节点
 
       ballList[i].row++;
-      ballList[i].index += 8; // ballList[i].node.innerText = ballList[i].index
-      // preNode.classList.add("transition");
-
-      preNode.style.top = parseInt(preNode.style.top) + 100 + 'px'; // let divList = document.querySelectorAll('#container');
-      // divList = [...divList]
-
+      ballList[i].index += 8;
+      preNode.style.top = parseInt(preNode.style.top) + 100 + 'px';
       ballList[i - 8] = null;
       moveToBottom();
     }
@@ -129,18 +127,18 @@ function createNewBall() {
         (function () {
           var row = Math.floor(index / 8) + 1;
           var column = index % 8 + 1;
-          var ball = document.createElement('div');
-          ball.style.background = createColor();
+          var ball = document.createElement('img'); // ball.style.background = createColor()
+
+          ball.style.display = 'inline-block';
+          ball.src = createColor();
           ball.style.width = '100px';
           ball.style.height = '100px';
           ball.style.borderRadius = '50%';
           ball.style.position = 'absolute';
           ball.style.top = "-".concat(initCount * 100, "px");
-          ball.style.left = "".concat((column - 1) * 100, "px"); // ball.innerText = index
-
-          ball.style.textAlign = 'center'; // console.log(`这是第${row}行，第${column}列`,ballList[index]);
-
-          var ballObj = new Ball(ball, row, column, index, ball.style.background);
+          ball.style.left = "".concat((column - 1) * 100, "px");
+          ball.style.textAlign = 'center';
+          var ballObj = new Ball(ball, row, column, index, ball.src);
           ballList[index] = ballObj;
           DIV.appendChild(ball);
           initCount++;
@@ -187,8 +185,9 @@ function createBall() {
     // 计算球的 x坐标 和 y坐标
     var row = Math.floor(i / 8) + 1;
     var column = i % 8 + 1;
-    var ball = document.createElement('div');
-    ball.style.background = createColor();
+    var ball = document.createElement("img");
+    ball.style.display = "inline-block";
+    ball.src = createColor();
     ball.style.width = '100px';
     ball.style.height = '100px';
     ball.style.borderRadius = '50%';
@@ -197,7 +196,7 @@ function createBall() {
     ball.style.left = "".concat((column - 1) * 100, "px"); // ball.innerText = i
 
     ball.style.textAlign = 'center';
-    var ballObj = new Ball(ball, row, column, i, ball.style.background);
+    var ballObj = new Ball(ball, row, column, i, ball.src);
     ballList.push(ballObj);
     collectCleanBall(ballObj, 'row', cleanListX); // 将生成的ball添加到页面
 
@@ -269,7 +268,7 @@ function collectCleanBallX() {
 
 
 function createColor() {
-  var colorArray = ['#0b8b40', '#f5d920', '#d8132e', '#0863aa', '#d15b98', '#e96069'];
+  var colorArray = ["assets/cat1.png", "assets/cat2.png", "assets/cat3.png", "assets/cat4.png", "assets/cat5.png", "assets/cat6.png"];
   var len = colorArray.length;
   var index = Math.floor(Math.random() * len);
   return "".concat(colorArray[index]);
@@ -277,11 +276,12 @@ function createColor() {
 
 
 function refreshBallList() {
+  // 消除小球的时候解绑事件
+  window.removeEventListener('click', playHandler);
   var allCleanBall = new Set([].concat(_toConsumableArray(cleanListX), _toConsumableArray(cleanListY)));
 
   _toConsumableArray(allCleanBall).forEach(function (item) {
     item.node.classList.add('tosmall');
-    celBallCol.push(item.column);
   });
 
   cleanListX = [];
@@ -297,14 +297,14 @@ function refreshBallList() {
       });
 
       resolve();
-    }, 1100);
+    }, 1000);
   });
 } // 清楚选中队列方法
 
 
 function cleanSecQueen() {
-  secQueen[0].node.style.border = 'none';
-  secQueen[1].node.style.border = 'none';
+  if (secQueen[0]) secQueen[0].node.style.padding = 0;
+  if (secQueen[1]) secQueen[1].node.style.padding = 0;
   secQueen = [];
 } // 调换两个节点位置
 
@@ -316,15 +316,15 @@ function replacePostion() {
   var lastNode = secQueen[1].node; //第二个节点
 
   if (firstNode.style.top == lastNode.style.top) {
-    var _ref = [lastNode.style.left, firstNode.style.left];
-    firstNode.style.left = _ref[0];
-    lastNode.style.left = _ref[1];
+    var _ref = [firstNode.style.left, lastNode.style.left];
+    lastNode.style.left = _ref[0];
+    firstNode.style.left = _ref[1];
   }
 
   if (firstNode.style.left == lastNode.style.left) {
-    var _ref2 = [lastNode.style.top, firstNode.style.top];
-    firstNode.style.top = _ref2[0];
-    lastNode.style.top = _ref2[1];
+    var _ref2 = [firstNode.style.top, lastNode.style.top];
+    lastNode.style.top = _ref2[0];
+    firstNode.style.top = _ref2[1];
   }
 
   ballList[secQueen[0].index].node = lastNode;
@@ -337,7 +337,9 @@ function replacePostion() {
 } // 给游戏区域添加点击事件
 
 
-window.addEventListener('click', function (e) {
+window.addEventListener('click', playHandler);
+
+function playHandler(e) {
   if (e.clientX < 800 && e.clientY < 600) {
     var row = Math.ceil(e.clientY / 100);
     var column = Math.ceil(e.clientX / 100);
@@ -345,41 +347,35 @@ window.addEventListener('click', function (e) {
     if (secQueen[0] && secQueen[0].row == row && secQueen[0].column == column) {
       cleanSecQueen();
       return;
-    } // console.log('当前点击的坐标x-column:', Math.ceil(e.clientY / 100), Math.ceil(e.clientX / 100));
-
+    }
 
     for (var i = 0; i < ballList.length; i++) {
       if (ballList[i].row == row && ballList[i].column == column) {
         secQueen.push(ballList[i]);
-        ballList[i].node.style.border = '5px solid #fff'; // 如果长度等于2，就进行位置对调
+        ballList[i].node.style.padding = '5px'; // 如果长度等于2，就进行位置对调
 
         if (secQueen.length == 2) {
           if ((secQueen[0].row == secQueen[1].row || secQueen[0].column == secQueen[1].column) && Math.abs(secQueen[0].row - secQueen[0].column - (secQueen[1].row - secQueen[1].column)) == 1) {
+            window.removeEventListener('click', playHandler);
             replacePostion(); // 换完位置后  搜索要清楚的横纵ball
 
             collectCleanBallX();
             collectCleanBallY();
-            console.log(cleanListX, cleanListY);
 
             if (cleanListX.length || cleanListY.length) {
-              initGame();
-              cleanSecQueen();
+              setTimeout(function () {
+                initGame();
+                cleanSecQueen();
+              }, 800);
             } else {
-              console.log(ballList);
               setTimeout(function () {
                 replacePostion();
+                window.addEventListener('click', playHandler);
                 cleanSecQueen();
-              }, 1000);
-            } // const originalIndex = secQueen[0].index
-            // const changeIndex = secQueen[1].index
-            // let tempObj = secQueen[0]
-            // console.log("11", tempObj)
-            // ballList[changeIndex] = secQueen[1]
-            // ballList[originalIndex] = tempObj
-            // console.log(ballList);
-
+              }, 1100);
+            }
           } else {
-            secQueen[0].node.style.border = 'none';
+            secQueen[0].node.style.padding = 0;
             secQueen.shift();
           }
         }
@@ -391,4 +387,4 @@ window.addEventListener('click', function (e) {
     if (secQueen.length == 0) return;
     cleanSecQueen();
   }
-});
+}

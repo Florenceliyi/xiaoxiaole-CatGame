@@ -261,8 +261,8 @@ function refreshBallList() {
 
 // 清楚选中队列方法
 function cleanSecQueen() {
-    if(secQueen[0]) secQueen[0].node.style.border = 'none';
-    if(secQueen[1]) secQueen[1].node.style.border = 'none';
+    if(secQueen[0]) secQueen[0].node.style.padding = 0;
+    if(secQueen[1]) secQueen[1].node.style.padding = 0;
     secQueen = []
 }
 // 调换两个节点位置
@@ -298,7 +298,7 @@ function playHandler (e) {
         for (let i = 0; i < ballList.length; i++) {
             if (ballList[i].row == row && ballList[i].column == column) {
                 secQueen.push(ballList[i])
-                ballList[i].node.style.border = '5px solid #fff'
+                ballList[i].node.style.padding = '5px'
 
                 // 如果长度等于2，就进行位置对调
                 if (secQueen.length == 2) {
@@ -322,7 +322,7 @@ function playHandler (e) {
                         }
 
                     } else {
-                        secQueen[0].node.style.border = 'none'
+                        secQueen[0].node.style.padding = 0
                         secQueen.shift()
                     }
                 }
